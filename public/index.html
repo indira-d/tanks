@@ -6,6 +6,7 @@
         <style>
             body { margin: 0; overflow: hidden; }
         </style>
+        <script src="/socket.io/socket.io.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const canvas = document.getElementById('canvas')
@@ -14,10 +15,22 @@
                 setup(canvas.getContext('2d'), w, h)
                 document.addEventListener('keydown', e => keyDown(e.key))
             })
+            function keyDown(key){
+            	switch (key) {
+	            	case 'w':
+	            	case 'a':
+	            	case 's':
+	            	case 'd':
+	            	case ' ':
+	            		socket.emit('cmd', key);
+            		break
+				}                       	
+            }
         </script>
     </head>
     <body>
         <canvas id="canvas"></canvas>
+        const socket 
         <script>
             const fieldWidth = 20
             const fieldHeight = 20
@@ -30,7 +43,7 @@
 
             const gameObjects = { 
 
-                    "1":{
+                    "tank1":{
                         "x": 0,
                         "y": 0,
                         "dx": 1,
@@ -39,7 +52,7 @@
                         't': 't'
 
                     },
-                    "2":{
+                    "tank2":{
                         "x": fieldWidth - 1,
                         "y": 0,
                         "dx": -1,
@@ -48,7 +61,7 @@
                         't': 't'
                     },
 
-                    "3":{
+                    "tank3":{
                         "x": fieldHeight - 1,
                         "y": fieldWidth - 1,
                         "dx": 1,
@@ -56,7 +69,7 @@
                         'c': 'blue',
                         't': 't'
                     },
-                    "4":{
+                    "tank4":{
                         "x": 0,
                         "y": fieldWidth-1,
                         "dx": 1,
@@ -64,7 +77,7 @@
                         'c': 'yellow',
                         't': 't'
                     },
-                    "5":{
+                    "bullet1":{
                         "x": fieldHeight / 2,
                         "y": fieldWidth / 2,
                         "dx": 1,
@@ -75,6 +88,7 @@
             }
 
             function setup(ctx, w, h) {
+              	socket = io();
                 cellSize = Math.min(w / fieldWidth, h / fieldHeight)
                 fieldScreenWidth = fieldWidth * cellSize
                 fieldScreenHeigth = fieldHeight * cellSize
