@@ -15,17 +15,6 @@
                 setup(canvas.getContext('2d'), w, h)
                 document.addEventListener('keydown', e => keyDown(e.key))
             })
-            function keyDown(key){
-            	switch (key) {
-	            	case 'w':
-	            	case 'a':
-	            	case 's':
-	            	case 'd':
-	            	case ' ':
-	            		socket.emit('cmd', key);
-            		break
-				}                       	
-            }
         </script>
     </head>
     <body>
@@ -41,68 +30,34 @@
             let fieldCenterShiftX
             let fieldCenterShiftY
 
-            const gameObjects = { 
-
-                    "tank1":{
-                        "x": 0,
-                        "y": 0,
-                        "dx": 1,
-                        "dy": 0,
-                        'c': 'red',
-                        't': 't'
-
-                    },
-                    "tank2":{
-                        "x": fieldWidth - 1,
-                        "y": 0,
-                        "dx": -1,
-                        "dy": 0,
-                        'c': 'green',
-                        't': 't'
-                    },
-
-                    "tank3":{
-                        "x": fieldHeight - 1,
-                        "y": fieldWidth - 1,
-                        "dx": 1,
-                        "dy": 0,
-                        'c': 'blue',
-                        't': 't'
-                    },
-                    "tank4":{
-                        "x": 0,
-                        "y": fieldWidth-1,
-                        "dx": 1,
-                        "dy": 0,
-                        'c': 'yellow',
-                        't': 't'
-                    },
-                    "bullet1":{
-                        "x": fieldHeight / 2,
-                        "y": fieldWidth / 2,
-                        "dx": 1,
-                        "dy": 0,
-                        'c': 'white',
-                        't': 'b'
-                    },
-            }
+            let gameObjects = { }
 
             function setup(ctx, w, h) {
               	socket = io();
+                socket.on('upd', msg => {
+                    gameObjects = Object.assign({}, gameObjects, msg);
+                });
+                socket.on('dstr', msg =>{
+                    for (let i=0; i < msg.length; ++i){
+                        delete gameObjects[msg[i]]
+                    }
+                });
+
                 cellSize = Math.min(w / fieldWidth, h / fieldHeight)
                 fieldScreenWidth = fieldWidth * cellSize
                 fieldScreenHeigth = fieldHeight * cellSize
                 fieldCenterShiftX = (w - fieldScreenWidth) / 2
                 fieldCenterShiftY = (h - fieldScreenHeigth) / 2
 
-                // TODO: добавить код инициализации
-                window.requestAnimationFrame(timestamp => draw(ctx, w, h, timestamp));
+                window.requestAnimationFrame(timestamp => draw(ctx, w, h, timestamp))
             }
+
             function draw(ctx, w, h, timestamp) {
                 ctx.fillStyle = 'black'
                 ctx.beginPath()
                 ctx.rect(0, 0, w, h)
                 ctx.fill()
+                
                 // код рисования поля
                 for (let y = 0; y < fieldHeight; ++y){
                     for (let x = 0; x < fieldWidth; ++x){
@@ -115,20 +70,29 @@
                     }
                 }
 
-		//код рисования игровых объектов
-		for(const [_, gameObject] of Object.entries(gameObjects)) {
-		    const screenX = fieldCenterShiftX + gameObject.x * cellSize
-		    const screenY = fieldCenterShiftY + gameObject.y * cellSize
-		    ctx.fillStyle = gameObject.c
-		    ctx.beginPath()
-		    ctx.rect(screenX + 1, screenY + 1, cellSize -2, cellSize - 2)
-		    ctx.fill()
-		}
+				//код рисования игровых объектов
+				for(const [_, gameObject] of Object.entries(gameObjects)) {
+				    const screenX = fieldCenterShiftX + gameObject.x * cellSize
+				    const screenY = fieldCenterShiftY + gameObject.y * cellSize
+				    ctx.fillStyle = gameObject.c
+				    ctx.beginPath()
+				    ctx.rect(screenX + 1, screenY + 1, cellSize -2, cellSize - 2)
+				    ctx.fill()
+				}
 
-                window.requestAnimationFrame(timestamp => draw(ctx, w, h, timestamp));
+                window.requestAnimationFrame(timestamp => draw(ctx, w, h, timestamp))
             }
+
             function keyDown(key) {
-                // TODO: добавить код обработки нажатия на клавиши
+               switch (key) {
+	            	case 'w':
+	            	case 'a':
+	            	case 's':
+	            	case 'd':
+	            	case ' ':
+	            		socket.emit('cmd', key)
+            		break
+				}
             }
         </script>
     </body>
